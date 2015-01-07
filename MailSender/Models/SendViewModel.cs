@@ -32,6 +32,7 @@ namespace MailSender.Models
         /// <summary>
         /// 0:QBWI,1:Hangfire,2:WebJobs
         /// </summary>
+        [Display(Name = "选用后台任务技术")]
         public int SendBy { get; set; }
     }
 }

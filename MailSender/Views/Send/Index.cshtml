@@ -7,10 +7,10 @@
 <h2>发送邮件</h2>
 
 
-@using (Html.BeginForm()) 
+@using (Html.BeginForm())
 {
     @Html.AntiForgeryToken()
-    
+
     <div class="form-horizontal">
         <h4>填写如下信息来发送邮件</h4>
         <hr />
@@ -52,6 +52,15 @@
             <div class="col-md-10">
                 @Html.EditorFor(model => model.Body, new { htmlAttributes = new { @class = "form-control" } })
                 @Html.ValidationMessageFor(model => model.Body, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.SendBy, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.RadioButton("SendBy", 0, true) QBWI |
+                @Html.RadioButton("SendBy", 1, false) Hangfire |
+                @Html.RadioButton("SendBy", 2, false) Azure WebJobs
             </div>
         </div>
 

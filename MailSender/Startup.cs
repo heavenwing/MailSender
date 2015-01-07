@@ -1,4 +1,6 @@
-﻿using Microsoft.Owin;
+﻿using Hangfire;
+using Hangfire.SqlServer;
+using Microsoft.Owin;
 using Owin;
 
 [assembly: OwinStartupAttribute(typeof(MailSender.Startup))]
@@ -9,6 +11,12 @@ namespace MailSender
         public void Configuration(IAppBuilder app)
         {
             ConfigureAuth(app);
+
+            app.UseHangfire(config =>
+            {
+                config.UseSqlServerStorage("Hangfire");
+                config.UseServer();
+            });
         }
     }
 }

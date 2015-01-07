@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Configuration;
 using System.IO;
 using System.Linq;
@@ -9,6 +10,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Web.Hosting;
 using System.Web.Mvc;
+using Hangfire;
 using MailSender.Models;
 
 namespace MailSender.Controllers
@@ -30,11 +32,12 @@ namespace MailSender.Controllers
                     HostingEnvironment.QueueBackgroundWorkItem(ct => SendMailAsync(model));
                 else if (model.SendBy == 1)
                 {
-                    //TODO use Hangfire
+                    BackgroundJob.Enqueue(() => SendMail(model));
                 }
                 else
                 {
                     //TODO use WebJobs
+                    throw new NotImplementedException();
                 }
                 return RedirectToAction("Pending");
             }
@@ -42,7 +45,32 @@ namespace MailSender.Controllers
             return View(model);
         }
 
-        private async Task SendMailAsync(SendViewModel model)
+        public static async Task SendMailAsync(SendViewModel model)
+        {
+            var smtpClient = new SmtpClient("smtp.sendgrid.net");
+            smtpClient.Credentials = GetCredential(); ;
+            await smtpClient.SendMailAsync(GetMailMessage(model));
+            //TODO notify
+        }
+
+        private static NetworkCredential GetCredential()
+        {
+            var credentials = new NetworkCredential(
+                ConfigurationManager.AppSettings["mailAccount"],
+                ConfigurationManager.AppSettings["mailPassword"]
+                );
+            return credentials;
+        }
+
+        public static void SendMail(SendViewModel model)
+        {
+            var smtpClient = new SmtpClient("smtp.sendgrid.net");
+            smtpClient.SendCompleted += smtpClient_SendCompleted;
+            smtpClient.Credentials = GetCredential();
+            smtpClient.SendAsync(GetMailMessage(model), null);
+        }
+
+        private static MailMessage GetMailMessage(SendViewModel model)
         {
             var myMessage = new MailMessage();
 
@@ -55,15 +83,12 @@ namespace MailSender.Controllers
             //Add the HTML and Text bodies
             myMessage.IsBodyHtml = false;
             myMessage.Body = model.Body;
+            return myMessage;
+        }
 
-            var credentials = new NetworkCredential(
-               ConfigurationManager.AppSettings["mailAccount"],
-               ConfigurationManager.AppSettings["mailPassword"]
-               );
-
-            var smtpClient = new SmtpClient("smtp.sendgrid.net");
-            smtpClient.Credentials = credentials;
-            await smtpClient.SendMailAsync(myMessage);
+        static void smtpClient_SendCompleted(object sender, AsyncCompletedEventArgs e)
+        {
+            //TODO notify
         }
 
         public ActionResult Pending()

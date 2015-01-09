@@ -17,6 +17,8 @@ namespace MailSender
                 config.UseSqlServerStorage("Hangfire");
                 config.UseServer();
             });
+
+            MessageSender.NotifyCompleted = SentNotification.Notify;
         }
     }
 }

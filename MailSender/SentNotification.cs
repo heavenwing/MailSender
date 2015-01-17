@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web;
+using Microsoft.AspNet.SignalR;
 
 namespace MailSender
 {
@@ -12,7 +13,8 @@ namespace MailSender
         {
             await Task.Run(() =>
             {
-                //TODO send SignalR message to web browser
+                var hub = GlobalHost.ConnectionManager.GetHubContext<NotificationHub>();
+                hub.Clients.All.notify();
             });
         }
     }

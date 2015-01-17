@@ -36,7 +36,7 @@ namespace MailSender.Controllers
                 }
                 else
                 {
-                    //TODO use WebJobs
+                    //TODO send queue message to use WebJobs
                     throw new NotImplementedException();
                 }
                 return RedirectToAction("Pending");
@@ -47,11 +47,12 @@ namespace MailSender.Controllers
 
         public ActionResult Pending()
         {
-            return Content("<h1>邮件发送任务已经加入队列</h1>");
+            return View();
         }
 
-        public ActionResult Notify()
+        public async Task<HttpStatusCodeResult> Notify()
         {
+            await SentNotification.Notify();
             return new HttpStatusCodeResult(HttpStatusCode.OK);
         }
     }

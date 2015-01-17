@@ -1,0 +1,29 @@
+﻿@{
+    ViewBag.Title = "Pending";
+}
+
+
+<h1 id="pending">邮件发送任务已经加入队列</h1>
+<h1 id="sent" style="display:none">邮件已经发送成功</h1>
+
+@section scripts
+{
+    <script src="~/Scripts/jquery.signalR-2.2.0.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+    <script>
+        $(function () {
+            // Declare a proxy to reference the hub.
+            var hub = $.connection.notificationHub;
+            // Create a function that the hub can call to notify.
+            hub.client.notify = function () {
+                $('#pending').hide();
+                $('#sent').show();
+            };
+            // Start the connection.
+            $.connection.hub.start();
+        });
+
+    </script>
+}
+
+

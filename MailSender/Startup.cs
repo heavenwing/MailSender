@@ -18,6 +18,8 @@ namespace MailSender
                 config.UseServer();
             });
 
+            app.MapSignalR();
+
             MessageSender.NotifyCompleted = SentNotification.Notify;
         }
     }

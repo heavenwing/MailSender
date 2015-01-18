@@ -12,6 +12,10 @@ using System.Web.Hosting;
 using System.Web.Mvc;
 using Hangfire;
 using MailSender.Models;
+using Microsoft.WindowsAzure;
+using Microsoft.WindowsAzure.Storage;
+using Microsoft.WindowsAzure.Storage.Queue;
+using Newtonsoft.Json;
 
 namespace MailSender.Controllers
 {
@@ -37,7 +41,16 @@ namespace MailSender.Controllers
                 else
                 {
                     //TODO send queue message to use WebJobs
-                    throw new NotImplementedException();
+                    var storageAccount = CloudStorageAccount.Parse(
+                        ConfigurationManager.ConnectionStrings["AzureWebJobsStorage"].ConnectionString);
+                    var queueClient = storageAccount.CreateCloudQueueClient();
+                    var queue = queueClient.GetQueueReference("pending-mail");
+
+                    // Create the queue if it doesn't already exist
+                    queue.CreateIfNotExists();
+
+                    var message = new CloudQueueMessage(JsonConvert.SerializeObject(model));
+                    queue.AddMessage(message);
                 }
                 return RedirectToAction("Pending");
             }

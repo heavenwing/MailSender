@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Configuration;
+using System.Diagnostics;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
@@ -16,11 +17,18 @@ namespace MailSender
         public static Func<Task> NotifyCompleted;
         public static async Task SendAsync(SendViewModel model)
         {
-            var smtpClient = new SmtpClient("smtp.sendgrid.net");
-            smtpClient.Credentials = GetCredential(); ;
-            await smtpClient.SendMailAsync(GetMailMessage(model));
-            if (NotifyCompleted != null)
-                await NotifyCompleted();
+            try
+            {
+                var smtpClient = new SmtpClient("smtp.sendgrid.net");
+                smtpClient.Credentials = GetCredential(); ;
+                await smtpClient.SendMailAsync(GetMailMessage(model));
+                if (NotifyCompleted != null)
+                    await NotifyCompleted();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.Message);
+            }
         }
 
         private static NetworkCredential GetCredential()
@@ -34,10 +42,17 @@ namespace MailSender
 
         public static void SendWithEvent(SendViewModel model)
         {
-            var smtpClient = new SmtpClient("smtp.sendgrid.net");
-            smtpClient.Credentials = GetCredential();
-            smtpClient.SendCompleted += smtpClient_SendCompleted;
-            smtpClient.SendAsync(GetMailMessage(model), null);
+            try
+            {
+                var smtpClient = new SmtpClient("smtp.sendgrid.net");
+                smtpClient.Credentials = GetCredential();
+                smtpClient.SendCompleted += smtpClient_SendCompleted;
+                smtpClient.SendAsync(GetMailMessage(model), null);
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.Message);
+            }
         }
 
         private static MailMessage GetMailMessage(SendViewModel model)
@@ -58,8 +73,15 @@ namespace MailSender
 
         static async void smtpClient_SendCompleted(object sender, AsyncCompletedEventArgs e)
         {
-            if (NotifyCompleted != null)
-                await NotifyCompleted();
+            try
+            {
+                if (NotifyCompleted != null)
+                    await NotifyCompleted();
+            }
+            catch (Exception ex)
+            {
+                Trace.TraceError(ex.Message);
+            }
         }
     }
 }

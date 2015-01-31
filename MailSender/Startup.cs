@@ -1,4 +1,5 @@
 ﻿using Hangfire;
+using Hangfire.Dashboard;
 using Hangfire.SqlServer;
 using Microsoft.Owin;
 using Owin;
@@ -16,6 +17,17 @@ namespace MailSender
             {
                 config.UseSqlServerStorage("Hangfire");
                 config.UseServer();
+
+                //config.UseAuthorizationFilters(new AuthorizationFilter
+                //{
+                //    Users = "admin, superuser", // allow only specified users
+                //    Roles = "admins" // allow only specified roles
+                //});
+
+                //// or
+
+                //config.UseAuthorizationFilters(
+                //    new ClaimsBasedAuthorizationFilter("hangfire", "access"));
             });
 
             app.MapSignalR();
